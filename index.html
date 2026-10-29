@@ -72,6 +72,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--ac);outline-offs
 @media (prefers-reduced-motion:reduce){#nav svg,#nav svg *,.logo{animation:none!important}}
 section.tab{display:none}section.tab.on{display:block}
 #curve svg{max-width:680px;display:block;margin:0 auto}
+.top{flex-wrap:wrap}.tag:empty{display:none}
+.chip{background:var(--bg);color:var(--mu);border:1px solid var(--bd);padding:6px 10px;margin:0 6px 6px 0;border-radius:99px;font-size:.8rem}.chip.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+body.demo .top h1::after{content:"DÉMO";font-size:.6rem;margin-left:8px;padding:2px 7px;border-radius:99px;background:var(--warn);color:#000;vertical-align:middle}
 @media (max-width:360px){main{padding:14px 10px}.row{grid-template-columns:1fr}.stat b{font-size:1.1rem}#nav button{font-size:.6rem}.top h1{font-size:1.1rem}}
 @media (min-width:768px){main{max-width:900px;padding:24px}section.tab.on{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}section.tab.on>.card{margin-bottom:0}#stats,#alert,.foot,.card:has(#curve),.card:has(#list){grid-column:1/-1}#stats{grid-template-columns:repeat(4,1fr);margin-bottom:0}#alert:empty{display:none}#t-add.on{display:block;max-width:640px;margin:0 auto}}
 @media (min-width:1024px){body{padding-left:210px;padding-bottom:24px}main{max-width:1060px}#nav{top:0;right:auto;width:210px;flex-direction:column;border-top:0;border-right:1px solid var(--bd);padding:20px 12px;gap:4px;justify-content:flex-start}#nav button{flex:none;flex-direction:row;justify-content:flex-start;gap:12px;font-size:.92rem;padding:11px 14px}#nav button.on{background:var(--bg)}}
@@ -89,7 +92,7 @@ details{border-top:1px solid var(--bd);padding:8px 0}details:first-of-type{borde
 </head>
 <body>
 <main>
-<div class="top"><h1>📒 Mon journal</h1><button class="theme" id="theme" type="button">🌗 Auto</button></div>
+<div class="top"><h1>📒 Mon journal</h1><div class="seg" id="acct" style="margin:0"><button type="button" data-a="real" class="on">Réel</button><button type="button" data-a="demo">Démo</button></div><button class="theme" id="theme" type="button">🌗 Auto</button></div>
 
 <div id="alert"></div>
 <div class="stats" id="stats"></div>
@@ -135,6 +138,8 @@ details{border-top:1px solid var(--bd);padding:8px 0}details:first-of-type{borde
 <div><label>Émotion</label><select id="emo"><option>😌 Calme</option><option>😬 Stressée</option><option>🤑 Euphorique</option><option>😡 Frustrée</option><option>😨 Peur</option></select></div>
 </div>
 <div class="row"><div><label>Résultat réel MT5 (optionnel)</label><input id="real" type="number" step="any" inputmode="decimal" placeholder="Ex : 1.10"></div><div><label>Plan respecté ?</label><select id="plan"><option value="1">Oui</option><option value="0">Non, impulsif</option></select></div></div>
+<label>Tags (erreurs, stratégie)</label><div id="chips"></div>
+<label>Confiance (1 à 5)</label><select id="conf"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
 <label>Raison du trade / leçon apprise</label>
 <textarea id="note" rows="3" placeholder="Pourquoi j’ai pris ce trade, ce que j’ai appris…"></textarea>
 <button class="primary" id="add" disabled>Coche la checklist pour ajouter</button>
@@ -149,6 +154,8 @@ details{border-top:1px solid var(--bd);padding:8px 0}details:first-of-type{borde
 <div class="card"><b>Historique</b>
 <div class="seg" id="seg"><button type="button" data-v="day" class="on">Jour</button><button type="button" data-v="week">Semaine</button><button type="button" data-v="month">Mois</button></div>
 <div class="note" style="margin-top:8px">Touche une ligne pour la dérouler. Le % est calculé sur le capital de la veille (ou du début de la période).</div>
+<div class="row" style="margin-top:8px"><select id="fa"><option value="">Tous les actifs</option></select><select id="fg"><option value="">Tous les tags</option></select></div>
+<select id="fp" style="margin-top:8px"><option value="">Toute la période</option><option value="7">7 derniers jours</option><option value="30">30 derniers jours</option><option value="90">90 derniers jours</option></select>
 <div id="list"></div></div>
 <div class="card"><b>📖 Petit lexique</b>
 <details><summary>Pip</summary><p>La plus petite variation de prix courante d’une paire de devises (souvent 0,0001).</p></details>
@@ -168,7 +175,11 @@ details{border-top:1px solid var(--bd);padding:8px 0}details:first-of-type{borde
 <textarea id="bk" rows="4" placeholder="Ta sauvegarde apparaîtra ici…" style="margin-top:8px"></textarea>
 <div class="row" style="margin-top:8px"><button type="button" class="theme" id="bkgen">Créer la sauvegarde</button><button type="button" class="theme" id="bkcopy">Copier</button></div>
 <button type="button" class="primary" id="bkrest">Restaurer depuis le texte collé</button>
+<div class="row" style="margin-top:10px"><button type="button" class="theme" id="bkdl">Télécharger (fichier)</button><button type="button" class="theme" id="demoreset">Vider le compte démo</button></div>
+<label>Importer une sauvegarde (.json)</label><input type="file" id="bkimp" accept=".json,application/json">
+<label>Importer un historique MT5 (.csv)</label><input type="file" id="csvf" accept=".csv,.txt,text/csv">
 <div id="bkmsg" class="note" style="margin-top:8px"></div></div>
+<div class="card"><b>Tags et confiance</b><div id="tagst"></div><div id="confs" style="margin-top:10px"></div></div>
 </main>
 <div id="dlg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;align-items:center;justify-content:center;padding:20px"><div class="card" style="max-width:360px;width:100%;margin:0"><p id="dlgmsg" style="margin:0 0 14px"></p><div class="row"><button type="button" id="dno" class="theme">Annuler</button><button type="button" id="dyes" class="primary" style="margin:0">Oui</button></div></div></div>
 <script>
@@ -183,7 +194,7 @@ function rr(t){return(t.stop&&t.tp&&Math.abs(t.entry-t.stop)>0)?Math.abs(t.tp-t.
 function fmt(n){return(n>0?"+":"")+n.toFixed(2)}
 function cls(n){return n>0?"gain":n<0?"loss":""}
 function sum(a){return a.reduce(function(x,y){return x+y},0)}
-function render(){
+function render(){fillF();
   var p=trades.map(pnl),tot=sum(p),w=p.filter(function(x){return x>0}),l=p.filter(function(x){return x<0});
   var rate=trades.length?Math.round(w.length/trades.length*100)+" %":"–";
   var h='<div class="stat"><small>Résultat total</small><b class="'+cls(tot)+'">'+fmt(tot)+'</b></div>';
@@ -194,16 +205,16 @@ function render(){
   var s=trades.slice().sort(function(a,b){return b.date.localeCompare(a.date)||b.id-a.id}),streak=0;
   for(var i=0;i<s.length;i++){if(pnl(s[i])<0)streak++;else break}
   $("alert").innerHTML=streak>=3?'<div class="alert">⚠️ '+streak+' pertes d’affilée. Fais une pause, respire, et relis ton plan avant le prochain trade.</div>':"";
-  var g={};trades.forEach(function(t){(g[t.emo]=g[t.emo]||[]).push(pnl(t))});
+  var g={};trades.forEach(function(t){if(t.emo)(g[t.emo]=g[t.emo]||[]).push(pnl(t))});
   var ke=Object.keys(g),eh="";
   ke.forEach(function(k){var a=g[k],avg=sum(a)/a.length,wr=Math.round(a.filter(function(x){return x>0}).length/a.length*100);
     eh+='<div class="emo"><span></span><span>'+a.length+' trade'+(a.length>1?"s":"")+' · '+wr+' % · <b class="'+cls(avg)+'">'+fmt(avg)+'</b> moy.</span></div>'});
   $("emos").innerHTML=eh||'<div class="empty">Tes stats par émotion apparaîtront ici.</div>';
   var sp=$("emos").querySelectorAll(".emo > span:first-child");ke.forEach(function(k,i){sp[i].textContent=k});
-  rrStats();drawCurve();week();groupStats();lastG="";var el=$("list");el.innerHTML="";
+  bkRemind();rrStats();drawCurve();week();groupStats();lastG="";var el=$("list");el.innerHTML="";
   if(!trades.length){el.innerHTML='<div class="empty">Aucun trade pour l’instant. Ajoute le premier ! 💪</div>';return}
-  s.forEach(function(t){
-    var gk=gkey(t);if(gk!==lastG){var gl=s.filter(function(z){return gkey(z)===gk}),gp=sum(gl.map(pnl)),gh=document.createElement("div");gh.className="gh";var a1=document.createElement("span");a1.textContent=glabel(t)+" · "+gl.length+" trade"+(gl.length>1?"s":"");if(openSet[gk]===undefined)openSet[gk]=(lastG==="");
+  s.filter(passF).forEach(function(t){
+    var gk=gkey(t);if(gk!==lastG){var gl=s.filter(function(z){return gkey(z)===gk&&passF(z)}),gp=sum(gl.map(pnl)),gh=document.createElement("div");gh.className="gh";var a1=document.createElement("span");a1.textContent=glabel(t)+" · "+gl.length+" trade"+(gl.length>1?"s":"");if(openSet[gk]===undefined)openSet[gk]=(lastG==="");
     var st0=view==="month"?gk+"-01":gk,pc=cap+sum(trades.filter(function(z){return z.date<st0}).map(pnl)),a2=document.createElement("b");a2.className=cls(gp);a2.textContent=fmt(gp)+(pc>0?" ("+fmt(gp/pc*100)+" %)":"");
     a1.textContent=(openSet[gk]?"▾ ":"▸ ")+a1.textContent;gh.appendChild(a1);gh.appendChild(a2);el.appendChild(gh);
     curBody=document.createElement("div");curBody.style.display=openSet[gk]?"block":"none";el.appendChild(curBody);gh.style.cursor="pointer";
@@ -245,7 +256,7 @@ function applyTheme(){var r=document.documentElement;if(th==="auto")r.removeAttr
 $("theme").onclick=function(){th=themes[(themes.indexOf(th)+1)%3];try{localStorage.setItem("journal-theme",th)}catch(e){}applyTheme()};
 function pts(t){return t.side==="long"?t.exit-t.entry:t.entry-t.exit}
 function groups(keyf,order,id,msg,showPts){
-  var g={};trades.forEach(function(t){var k=keyf(t);if(k)(g[k]=g[k]||[]).push(t)});
+  var g={};trades.forEach(function(t){var k=keyf(t);[].concat(k||[]).forEach(function(kk){(g[kk]=g[kk]||[]).push(t)})});
   var ks=Object.keys(g);
   if(order)ks.sort(function(a,b){return order.indexOf(a)-order.indexOf(b)});else ks.sort(function(a,b){return sum(g[b].map(pnl))-sum(g[a].map(pnl))});
   var el=$(id);el.innerHTML="";
@@ -258,7 +269,7 @@ function groups(keyf,order,id,msg,showPts){
     d.appendChild(l);d.appendChild(r);el.appendChild(d)});
 }
 var SLOTS=["🌙 Nuit (0h–6h)","🌅 Matin (6h–12h)","☀️ Après-midi (12h–18h)","🌆 Soir (18h–24h)"];
-function groupStats(){groups(function(t){return t.plan===1?"Plan respecté":t.plan===0?"Trade impulsif":null},["Plan respecté","Trade impulsif"],"disc","Réponds à « Plan respecté ? » sur tes trades pour comparer.",false);
+function groupStats(){groups(function(t){return t.tags&&t.tags.length?t.tags:null},null,"tagst","Ajoute des tags à tes trades pour voir lesquels te coûtent ou te rapportent.",false);groups(function(t){return t.conf?"Confiance "+t.conf+"/5":null},["Confiance 1/5","Confiance 2/5","Confiance 3/5","Confiance 4/5","Confiance 5/5"],"confs","Note ta confiance sur tes trades pour la comparer à tes résultats.",false);groups(function(t){return t.plan===1?"Plan respecté":t.plan===0?"Trade impulsif":null},["Plan respecté","Trade impulsif"],"disc","Réponds à « Plan respecté ? » sur tes trades pour comparer.",false);
   groups(function(t){return t.asset.trim()},null,"assets","Tes stats par actif apparaîtront ici.",true);
   groups(function(t){if(!t.time)return null;return SLOTS[Math.floor(parseInt(t.time.slice(0,2),10)/6)]},SLOTS,"hours","Renseigne l’heure de tes trades pour voir à quels moments tu performes le mieux.",false);
 }
@@ -297,7 +308,7 @@ function drawCurve(){
 function ask(msg,yes,info){$("dlgmsg").textContent=msg;$("dlg").style.display="flex";$("dno").style.display=info?"none":"block";$("dyes").textContent=info?"OK":"Oui";$("dyes").onclick=function(){$("dlg").style.display="none";if(yes)yes()};$("dno").onclick=function(){$("dlg").style.display="none"}}
 var TABS=[["home","🏠","Accueil"],["add","➕","Trade"],["ana","📊","Analyse"],["hist","📒","Historique"],["more","⚙️","Plus"]];
 function buildTabs(){
-  var m=document.querySelector("main"),map={home:[$("alert"),$("stats"),$("rr").parentNode,$("curve").parentNode,$("week").parentNode],add:[$("f")],ana:[$("disc").parentNode,$("emos").parentNode,$("assets").parentNode,$("hours").parentNode],hist:[$("list").parentNode],more:[$("cap").parentNode,$("bk").parentNode,(function(){var d=document.querySelectorAll("details");return d[d.length-1].parentNode})(),document.querySelector(".foot")]};
+  var m=document.querySelector("main"),map={home:[$("alert"),$("stats"),$("rr").parentNode,$("curve").parentNode,$("week").parentNode],add:[$("f")],ana:[$("disc").parentNode,$("tagst").parentNode,$("emos").parentNode,$("assets").parentNode,$("hours").parentNode],hist:[$("list").parentNode],more:[$("cap").parentNode,$("bk").parentNode,(function(){var d=document.querySelectorAll("details");return d[d.length-1].parentNode})(),document.querySelector(".foot")]};
   var nav=document.createElement("nav");nav.id="nav";
   TABS.forEach(function(t){var s=document.createElement("section");s.id="t-"+t[0];map[t[0]].forEach(function(e){s.appendChild(e)});m.appendChild(s);
     var b=document.createElement("button");b.type="button";b.id="nb-"+t[0];b.innerHTML="<span>"+(ICONS[t[0]]||t[1])+"</span>"+t[2];b.onclick=function(){showTab(t[0])};nav.appendChild(b)});
@@ -326,7 +337,7 @@ function rrStats(){
     row("RR prévu moyen (stop / objectif)",prr!==null?"1:"+prr.toFixed(2):"–")+
     row("Taux de réussite"+(be!==null?" (seuil "+Math.round(be*100)+" %)":""),Math.round(wr*100)+" %")+
     row("Facteur de profit (gains ÷ pertes)",pf!==null?pf.toFixed(2):"∞")+
-    row("Espérance par trade",'<span class="'+cls(exp)+'">'+fmt(exp)+'</span>')+
+    row("Drawdown max (pire baisse)",ddTxt())+row("Espérance par trade",'<span class="'+cls(exp)+'">'+fmt(exp)+'</span>')+
     (n<30?'<div class="note" style="margin-top:8px">Seulement '+n+' trade'+(n>1?"s":"")+' : ces chiffres deviennent fiables à partir d’environ 30 trades.</div>':'');
 }
 $("bkgen").onclick=function(){$("bk").value=JSON.stringify({app:"journal-trading",v:1,cap:cap,trades:trades});$("bkmsg").textContent=trades.length+" trade(s) dans la sauvegarde. Appuie sur Copier."};
@@ -334,9 +345,40 @@ $("bkcopy").onclick=function(){var t=$("bk");if(!t.value){$("bkmsg").textContent
 $("bkrest").onclick=function(){var d;try{d=JSON.parse($("bk").value)}catch(e){d=null}
   if(!d||d.app!=="journal-trading"||!Array.isArray(d.trades)){$("bkmsg").textContent="Sauvegarde invalide : colle le texte complet dans le champ.";return}
   ask("Restaurer "+d.trades.length+" trade(s) ? Les trades déjà présents sont gardés.",function(){var ids={};trades.forEach(function(t){ids[t.id]=1});var n=0;d.trades.forEach(function(t){if(t&&t.id&&!ids[t.id]){trades.push(t);n++}});if(!(cap>0)&&d.cap>0){cap=d.cap;$("cap").value=cap}save();render();upd();$("bkmsg").textContent=n+" trade(s) ajouté(s)."})};
+var acct="real",TAGS=["Entrée trop tôt","Entrée tardive","Stop déplacé","Sans stop","Sur-trading","Revenge trade","Cassure","Support/Résistance","Tendance","Retournement"],selTags=[],F={a:"",g:"",p:""};
+function chips(){var c=$("chips");c.innerHTML="";TAGS.forEach(function(g){var b=document.createElement("button");b.type="button";b.className="chip"+(selTags.indexOf(g)>=0?" on":"");b.textContent=g;b.onclick=function(){var i=selTags.indexOf(g);if(i<0)selTags.push(g);else selTags.splice(i,1);b.className="chip"+(i<0?" on":"")};c.appendChild(b)})}
+function passF(t){return(!F.a||t.asset.trim()===F.a)&&(!F.g||(t.tags||[]).indexOf(F.g)>=0)&&(!F.p||t.date>=ld(Date.now()-F.p*864e5))}
+function fillF(){var sa=$("fa"),v=sa.value,u=[];trades.forEach(function(t){var a=t.asset.trim();if(u.indexOf(a)<0)u.push(a)});u.sort();sa.innerHTML='<option value="">Tous les actifs</option>';u.forEach(function(a){var o=document.createElement("option");o.value=a;o.textContent=a;sa.appendChild(o)});sa.value=u.indexOf(v)<0?"":v;F.a=sa.value}
+function updSeg(){document.querySelectorAll("#acct button").forEach(function(b){b.className=b.getAttribute("data-a")===acct?"on":""});document.body.classList.toggle("demo",acct==="demo")}
+function setAcct(a){save();acct=a;KEY="journal-trading-v1"+(a==="demo"?"-demo":"");CK="journal-capital-v1"+(a==="demo"?"-demo":"");try{localStorage.setItem("journal-acct",a)}catch(e){}load();$("cap").value=cap||"";openSet={};stopEdit(true);updSeg();render();upd()}
+function initF(){var fg=$("fg");TAGS.forEach(function(g){var o=document.createElement("option");o.value=g;o.textContent=g;fg.appendChild(o)});["fa","fg","fp"].forEach(function(i){$(i).onchange=function(){F.a=$("fa").value;F.g=$("fg").value;F.p=$("fp").value;render()}});document.querySelectorAll("#acct button").forEach(function(b){b.onclick=function(){setAcct(b.getAttribute("data-a"))}})}
+function ddTxt(){var a=trades.slice().sort(function(x,y){return x.date.localeCompare(y.date)||x.id-y.id}),b=cap,pk=cap,dd=0,pp=0;a.forEach(function(t){b+=pnl(t);if(b>pk)pk=b;var d=pk-b;if(d>dd){dd=d;pp=pk>0?d/pk*100:0}});return dd>0?'<span class="loss">-'+dd.toFixed(2)+(pp>0?" ("+pp.toFixed(1)+" %)":"")+"</span>":"0"}
+function bkRemind(){var l="";try{l=localStorage.getItem("journal-lastbk")||""}catch(e){}if(trades.length&&(!l||l<ld(Date.now()-7*864e5)))$("alert").innerHTML+='<div class="alert">Pense à faire une sauvegarde (onglet Plus, Télécharger).</div>'}
+function num(s){s=String(s||"").replace(/[\s\u00a0]/g,"");if(s.indexOf(",")>=0&&s.indexOf(".")>=0)s=s.replace(/,/g,"");else s=s.replace(",",".");return parseFloat(s)}
+function importCSV(txt){var L=txt.split(/\r?\n/).filter(function(l){return l.trim()}),dl=txt.split(";").length>txt.split(",").length?";":(txt.indexOf("\t")>=0?"\t":","),hi=-1,H=[];
+  for(var i=0;i<L.length;i++){var c=L[i].split(dl).map(function(x){return x.trim().toLowerCase()});if((c.indexOf("symbol")>=0||c.indexOf("symbole")>=0)&&c.indexOf("profit")>=0){hi=i;H=c;break}}
+  if(hi<0)return -1;
+  var ix=function(n,k){var r=-1,c=0;H.forEach(function(h,j){if(n.indexOf(h)>=0){if(c===k)r=j;c++}});return r};
+  var iS=ix(["symbol","symbole"],0),iT=ix(["type"],0),iV=ix(["volume"],0),iO=ix(["time","heure"],0),iPo=ix(["price","prix"],0),iPc=ix(["price","prix"],1),iSL=ix(["s / l","s/l"],0),iTP=ix(["t / p","t/p"],0),iPr=ix(["profit"],0),iCm=ix(["commission"],0),iSw=ix(["swap"],0),iId=ix(["position","ticket","order"],0),n=0,ids={};
+  trades.forEach(function(t){ids[t.id]=1});
+  for(var r=hi+1;r<L.length;r++){var c=L[r].split(dl),ty=(c[iT]||"").trim().toLowerCase();if(ty!=="buy"&&ty!=="sell")continue;
+    var en=num(c[iPo]),ex=num(c[iPc]),q=num(c[iV]),pr=num(c[iPr]);if(isNaN(en)||isNaN(ex)||isNaN(q)||isNaN(pr))continue;
+    var tm=(c[iO]||"").trim().replace(/\./g,"-"),id=iId>=0?parseInt(c[iId],10):NaN;if(isNaN(id))id=Date.now()+r;if(ids[id])continue;ids[id]=1;
+    trades.push({id:id,date:tm.slice(0,10)||ld(),time:tm.slice(11,16),asset:(c[iS]||"").trim(),side:ty==="buy"?"long":"short",qty:q,entry:en,exit:ex,stop:num(c[iSL])||0,tp:num(c[iTP])||0,fees:0,real:pr+(num(c[iCm])||0)+(num(c[iSw])||0),emo:"",note:"Importé MT5"});n++}
+  save();render();upd();return n}
+function snap(){save();var g=function(k){try{return JSON.parse(localStorage.getItem(k))||[]}catch(e){return[]}},c=function(k){try{return parseFloat(localStorage.getItem(k))||0}catch(e){return 0}};return{app:"journal-trading",v:2,date:ld(),real:{cap:c("journal-capital-v1"),trades:g("journal-trading-v1")},demo:{cap:c("journal-capital-v1-demo"),trades:g("journal-trading-v1-demo")}}}
+function restoreData(d){if(!d||d.app!=="journal-trading")return -1;var acc=d.v===2?{real:d.real,demo:d.demo}:{real:{cap:d.cap,trades:d.trades},demo:null},n=0;save();
+  [["real","journal-trading-v1","journal-capital-v1"],["demo","journal-trading-v1-demo","journal-capital-v1-demo"]].forEach(function(z){var a=acc[z[0]];if(!a||!Array.isArray(a.trades))return;var cur;try{cur=JSON.parse(localStorage.getItem(z[1]))||[]}catch(e){cur=[]}var ids={};cur.forEach(function(t){ids[t.id]=1});a.trades.forEach(function(t){if(t&&t.id&&!ids[t.id]){cur.push(t);n++}});try{localStorage.setItem(z[1],JSON.stringify(cur));if(!(parseFloat(localStorage.getItem(z[2]))>0)&&a.cap>0)localStorage.setItem(z[2],String(a.cap))}catch(e){}});
+  load();$("cap").value=cap||"";render();upd();return n}
+$("bkgen").onclick=function(){$("bk").value=JSON.stringify(snap());try{localStorage.setItem("journal-lastbk",ld())}catch(e){}$("bkmsg").textContent="Sauvegarde créée (compte réel + démo). Appuie sur Copier.";render()};
+$("bkrest").onclick=function(){var d;try{d=JSON.parse($("bk").value)}catch(e){d=null}if(!d||d.app!=="journal-trading"){$("bkmsg").textContent="Sauvegarde invalide : colle le texte complet dans le champ.";return}ask("Restaurer cette sauvegarde ? Les trades déjà présents sont gardés.",function(){$("bkmsg").textContent=restoreData(d)+" trade(s) ajouté(s)."})};
+$("bkdl").onclick=function(){try{var b=new Blob([JSON.stringify(snap())],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="journal-trading-"+ld()+".json";document.body.appendChild(a);a.click();a.remove();localStorage.setItem("journal-lastbk",ld());$("bkmsg").textContent="Fichier créé : cherche-le dans Téléchargements.";render()}catch(e){$("bkmsg").textContent="Téléchargement impossible ici. Utilise l’app installée ou la sauvegarde par texte."}};
+$("bkimp").onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var d;try{d=JSON.parse(r.result)}catch(e){d=null}var n=restoreData(d);$("bkmsg").textContent=n<0?"Fichier invalide.":n+" trade(s) ajouté(s)."};r.readAsText(f)};
+$("csvf").onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var n=importCSV(String(r.result));$("bkmsg").textContent=n<0?"Format non reconnu : il faut un export MT5 avec les colonnes Symbol et Profit.":n+" trade(s) importé(s) dans le compte "+(acct==="demo"?"démo":"réel")+"."};r.readAsText(f)};
+$("demoreset").onclick=function(){ask("Vider tout le compte démo (trades et capital) ?",function(){try{localStorage.removeItem("journal-trading-v1-demo");localStorage.removeItem("journal-capital-v1-demo")}catch(e){}if(acct==="demo"){load();$("cap").value="";render();upd()}$("bkmsg").textContent="Compte démo vidé."})};
 var editId=null;
-function startEdit(t){editId=t.id;$("date").value=t.date;$("asset").value=t.asset;$("time").value=t.time||"";$("real").value=(typeof t.real==="number")?t.real:"";$("plan").value=t.plan===0?"0":"1";$("side").value=t.side;$("qty").value=t.qty;$("entry").value=t.entry;$("exit").value=t.exit;$("stop").value=t.stop||"";$("tp").value=t.tp||"";$("fees").value=t.fees;$("emo").value=t.emo;$("note").value=t.note||"";$("cancel").style.display="block";$("f").style.borderColor="var(--ac)";$("f").querySelector("b").textContent="Modifier le trade";upd();showTab("add")}
-function stopEdit(clear){editId=null;$("cancel").style.display="none";$("f").style.borderColor="";$("f").querySelector("b").textContent="Nouveau trade";if(clear){["asset","entry","exit","stop","tp","note"].forEach(function(i){$(i).value=""});$("qty").value=1;$("fees").value=0;$("real").value="";$("plan").value="1";$("time").value=new Date().toTimeString().slice(0,5)}upd()}
+function startEdit(t){editId=t.id;$("date").value=t.date;$("asset").value=t.asset;$("time").value=t.time||"";$("real").value=(typeof t.real==="number")?t.real:"";$("plan").value=t.plan===0?"0":"1";selTags=(t.tags||[]).slice();chips();$("conf").value=t.conf||"";$("side").value=t.side;$("qty").value=t.qty;$("entry").value=t.entry;$("exit").value=t.exit;$("stop").value=t.stop||"";$("tp").value=t.tp||"";$("fees").value=t.fees;$("emo").value=t.emo;$("note").value=t.note||"";$("cancel").style.display="block";$("f").style.borderColor="var(--ac)";$("f").querySelector("b").textContent="Modifier le trade";upd();showTab("add")}
+function stopEdit(clear){editId=null;$("cancel").style.display="none";$("f").style.borderColor="";$("f").querySelector("b").textContent="Nouveau trade";if(clear){["asset","entry","exit","stop","tp","note"].forEach(function(i){$(i).value=""});$("qty").value=1;$("fees").value=0;selTags=[];chips();$("conf").value="";$("real").value="";$("plan").value="1";$("time").value=new Date().toTimeString().slice(0,5)}upd()}
 $("cancel").onclick=function(){stopEdit(true);showTab("hist")};
 function checked(){var c=document.querySelectorAll(".ck"),ok=true;c.forEach(function(x){if(!x.checked)ok=false});return ok}
 function upd(){
@@ -361,15 +403,16 @@ function go(skip){
   var stv=parseFloat($("stop").value),sd=$("side").value,dif=Math.abs(ex-entry)/Math.abs(entry)*100;
   var msgs=[];if(dif>5)msgs.push("⚠️ L’entrée ("+entry+") et la sortie ("+ex+") sont très éloignées ("+dif.toFixed(1)+" %). Vérifie ta saisie.");
   if(stv&&((sd==="long"&&stv>entry)||(sd==="short"&&stv<entry)))msgs.push("⚠️ Ton stop-loss ("+stv+") est du mauvais côté de ton entrée pour "+(sd==="long"?"un achat":"une vente")+".");if(msgs.length&&!skip){ask(msgs.join(" ")+" Enregistrer quand même ?",function(){go(true)});return}
-  var obj={id:editId!==null?editId:Date.now(),date:$("date").value||ld(),asset:asset,time:$("time").value||"",real:(isNaN(parseFloat($("real").value))?null:parseFloat($("real").value)),plan:parseInt($("plan").value,10),side:$("side").value,qty:qty,entry:entry,exit:ex,stop:parseFloat($("stop").value)||0,tp:parseFloat($("tp").value)||0,fees:parseFloat($("fees").value)||0,emo:$("emo").value,note:$("note").value.trim()};
+  var obj={id:editId!==null?editId:Date.now(),date:$("date").value||ld(),asset:asset,time:$("time").value||"",real:(isNaN(parseFloat($("real").value))?null:parseFloat($("real").value)),plan:parseInt($("plan").value,10),tags:selTags.slice(),conf:parseInt($("conf").value,10)||0,side:$("side").value,qty:qty,entry:entry,exit:ex,stop:parseFloat($("stop").value)||0,tp:parseFloat($("tp").value)||0,fees:parseFloat($("fees").value)||0,emo:$("emo").value,note:$("note").value.trim()};
   if(editId!==null){trades=trades.map(function(z){return z.id===editId?obj:z})}else trades.push(obj);
   save();["asset","entry","exit","stop","tp","note"].forEach(function(i){$(i).value=""});
-  document.querySelectorAll(".ck").forEach(function(c){c.checked=false});stopEdit(false);$("real").value="";$("plan").value="1";$("date").value=ld();$("time").value=new Date().toTimeString().slice(0,5);render();upd();showTab("hist");
+  document.querySelectorAll(".ck").forEach(function(c){c.checked=false});stopEdit(false);selTags=[];chips();$("conf").value="";$("real").value="";$("plan").value="1";$("date").value=ld();$("time").value=new Date().toTimeString().slice(0,5);render();upd();showTab("hist");
 };
 $("date").value=ld();$("time").value=new Date().toTimeString().slice(0,5);
 try{th=localStorage.getItem("journal-theme")||"auto"}catch(e){th="auto"}
 if(themes.indexOf(th)<0)th="auto";applyTheme();
-buildTabs();load();if(cap)$("cap").value=cap;render();upd();
+try{if(localStorage.getItem("journal-acct")==="demo"){acct="demo";KEY+="-demo";CK+="-demo"}}catch(e){}
+buildTabs();load();if(cap)$("cap").value=cap;chips();initF();updSeg();render();upd();
 </script>
 <script>if("serviceWorker" in navigator&&location.protocol.indexOf("http")===0){window.addEventListener("load",function(){try{navigator.serviceWorker.register("sw.js")}catch(e){}})}</script>
 </body>
